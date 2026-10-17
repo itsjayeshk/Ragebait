@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAGE//SOCIAL — Your Worst Decision Today</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a0a;--fg:#f2f2f2;--panel:#141414;--panel2:#1c1c1c;--line:#2b2b2b;--red:#ff2d40;--yellow:#ffd60a;--green:#39ff14;--muted:#9a9a9a;--accent:#ff2d40}
+html[data-theme="day"]{--bg:#ffffff;--fg:#111;--panel:#f2f2f2;--panel2:#e6e6e6;--line:#bbb;--muted:#555;--accent:#d40000;--red:#c40000;--yellow:#8a6d00;--green:#0a7d00}
+html[data-theme="night"]{--bg:#030303;--fg:#eaeaea;--panel:#0e0e0e;--panel2:#161616;--line:#242424;--muted:#aaa}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:"Arial Black",Arial,system-ui,sans-serif;overflow:hidden}
+button{font-family:inherit}
+.btn{padding:10px 16px;border:2px solid var(--fg);background:var(--panel2);color:var(--fg);font-weight:900;letter-spacing:1px;cursor:pointer}
+.btn:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+.btn-red{background:var(--red);border-color:var(--red);color:#fff}
+.btn-ghost{background:none;color:var(--muted);border-color:var(--line)}
+.linklike{background:none;border:0;color:var(--yellow);text-decoration:underline;cursor:pointer;font-size:.85rem}
+.hidden{display:none!important}
+.small{font-size:.7rem;color:var(--muted)}
+
+/* topbar */
+.topbar{height:60px;display:flex;align-items:center;gap:12px;padding:0 16px;border-bottom:3px solid var(--line);background:var(--panel);position:relative;z-index:50}
+.topbar .logo{font-size:1.1rem;letter-spacing:-1px;cursor:pointer;user-select:none}
+.topbar .logo b{color:var(--red)}
+.rmeter{width:120px;height:14px;border:2px solid var(--line);background:var(--panel2)}
+.rmeter>div{height:100%;width:0%;background:var(--red);transition:width .3s}
+#btnNotifs{position:relative}
+#notifCount{background:var(--red);color:#fff;border-radius:50%;padding:1px 6px;font-size:.7rem;margin-left:4px;display:inline-block;transition:transform .2s}
+#notifCount.bump{transform:scale(1.4)}
+.hell .topbar{background:#1a0004;box-shadow:inset 0 -4px 0 #ff0022}
+.hell{--red:#ff0022}
+.hell .panel{border-color:#ff0022;box-shadow:10px 10px 0 rgba(255,0,34,.25)}
+
+/* world */
+#world{height:calc(100vh - 60px - 96px);overflow-x:auto;overflow-y:hidden;scrollbar-width:none;touch-action:pan-x pan-y}
+#world::-webkit-scrollbar{display:none}
+#world:focus-visible{outline:3px solid var(--yellow);outline-offset:-3px}
+#track{display:flex;gap:22px;padding:22px;height:100%;width:max-content}
+.panel{flex:none;height:100%;overflow-y:auto;background:var(--panel);border:3px solid var(--line);padding:22px;box-shadow:10px 10px 0 #000}
+.panel h2{color:var(--red);letter-spacing:1px;margin-bottom:10px;font-size:1.05rem}
+.panel h3{font-size:.9rem;letter-spacing:1px;margin:12px 0 6px}
+.post{border:2px solid var(--line);background:var(--panel2);padding:14px;margin:10px 0}
+.post p{margin:6px 0;line-height:1.45;font-size:.88rem}
+.avatar{width:88px;height:88px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.6rem;cursor:pointer;flex:none;user-select:none}
+.banner{background:linear-gradient(120deg,var(--red),#7a0010);color:#fff;font-weight:900;letter-spacing:3px;text-align:center;padding:34px 10px;font-size:clamp(1.1rem,3vw,1.8rem)}
+.statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:12px 0}
+.stat{border:2px solid var(--line);background:var(--panel2);padding:10px}
+.stat b{display:block;font-size:1.15rem;color:var(--yellow);cursor:help}
+.stat span{font-size:.62rem;letter-spacing:1px;color:var(--muted)}
+.badge{display:inline-block;border:2px solid var(--yellow);color:var(--yellow);font-size:.6rem;padding:2px 6px;letter-spacing:1px;margin-left:8px;vertical-align:middle}
+.likebtn.on{background:var(--red);border-color:var(--red);color:#fff}
+#followBtn{transition:transform .25s cubic-bezier(.2,.9,.3,1.6)}
+#followBtn.on{background:var(--green);border-color:var(--green);color:#000}
+.pollbar{height:16px;border:2px solid var(--line);background:var(--panel2);margin:4px 0}
+.pollbar>div{height:100%;background:var(--yellow);width:0%;transition:width .6s}
+.achgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.ach{border:2px dashed var(--line);padding:10px;font-size:.68rem;color:var(--muted)}
+.ach.got{border:2px solid var(--green);color:var(--green)}
+.chatlog{height:180px;overflow-y:auto;border:2px solid var(--line);background:var(--panel2);padding:10px;font-size:.8rem;margin-bottom:8px}
+.chatlog p{margin:4px 0;line-height:1.4}
+input,textarea{background:var(--panel2);border:2px solid var(--line);color:var(--fg);padding:10px;font:inherit;font-size:.85rem;width:100%}
+input:focus,textarea:focus{outline:3px solid var(--yellow);outline-offset:2px}
+
+/* bryce loud mode */
+body.loud .bryce-post p.btext{text-transform:uppercase;font-size:1.5em;animation:pulse .5s infinite alternate}
+@keyframes pulse{to{transform:scale(1.04);color:var(--red)}}
+#bryceBanner{border:3px solid var(--yellow);background:#2a2200;color:var(--yellow);padding:10px;font-weight:900;font-size:.85rem;margin:10px 0}
+
+/* pump dock */
+#pumpDock{height:96px;border-top:3px solid var(--line);background:var(--panel);display:flex;align-items:center;gap:12px;padding:0 16px;flex-wrap:wrap;z-index:50;position:relative}
+.gauge{width:200px;height:26px;border:3px solid var(--line);background:var(--panel2);position:relative}
+.gauge>div{height:100%;background:linear-gradient(90deg,#7a0010,var(--red),var(--yellow));width:100%;transition:width .25s}
+#pumpMsg{font-size:.7rem;color:var(--muted);flex:1;min-width:180px}
+#btnPump{font-size:1rem;padding:12px 22px}
+
+/* overlays */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px}
+.modal{background:var(--panel);border:3px solid var(--red);max-width:600px;width:100%;padding:24px;max-height:92vh;overflow-y:auto}
+.modal h2{color:var(--red);letter-spacing:1px;margin-bottom:10px;font-size:1.1rem}
+.bar{height:22px;border:2px solid var(--line);background:var(--panel2)}
+.bar>div{height:100%;width:0%;background:var(--red)}
+.spin{width:44px;height:44px;border:5px solid #333;border-top-color:#0f0;border-radius:50%;animation:sp 1s linear infinite;margin:0 auto 12px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.corn-wrap{background:#000;color:#0f0;border:4px double #0f0;font-family:"Comic Sans MS",cursive}
+.corn-wrap img,.corn-wrap svg{max-width:100%;display:block;margin:10px auto;border:2px solid #0f0}
+.blink2{animation:bl2 1s infinite}@keyframes bl2{50%{opacity:.2}}
+#deflateFlash{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(120,0,10,.9);z-index:1800;opacity:0;pointer-events:none;transition:opacity .25s;font-size:clamp(1.1rem,4vw,2.2rem);font-weight:900;color:#fff;text-align:center;padding:20px}
+#deflateFlash.show{opacity:1}
+.cookie{position:fixed;left:14px;bottom:14px;z-index:1400;width:min(340px,92vw);background:var(--panel);border:3px solid var(--yellow);padding:12px;font-size:.78rem;box-shadow:8px 8px 0 #000}
+.cookie h4{color:var(--yellow);margin-bottom:6px;letter-spacing:1px}
+#closeAllCookies{position:fixed;left:14px;bottom:8px;z-index:1450;transform:translateY(-100%)}
+.pop{position:fixed;width:240px;background:var(--panel);border:3px solid var(--red);padding:12px;z-index:1300;font-size:.8rem;box-shadow:8px 8px 0 #000}
+.pop button.x{float:right;margin:0 0 6px 6px}
+#closeAllCookies{bottom:110px}
+.toasts{position:fixed;bottom:106px;right:14px;display:flex;flex-direction:column;gap:8px;z-index:2000;max-width:320px}
+.toast{background:var(--panel);border:2px solid var(--red);padding:10px 12px;font-size:.8rem;box-shadow:6px 6px 0 #000;animation:tin .25s}
+.toast.warn{border-color:var(--yellow)}.toast.good{border-color:var(--green)}
+@keyframes tin{from{transform:translateY(12px);opacity:0}}
+.shake{animation:shk .35s}@keyframes shk{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}}
+@media (max-width:700px){.panel{width:86vw!important}.gauge{width:120px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo" id="logoEgg" title="RAGE//SOCIAL">RAGE<b>//</b>SOCIAL</div>
+  <div class="rmeter" aria-label="Rage meter"><div id="rFill"></div></div><span class="small" id="rPct">RAGE 0%</span>
+  <button class="btn" id="btnNotifs">🔔<span id="notifCount">3</span></button>
+  <span style="flex:1"></span>
+  <button class="btn themeBtn" data-k="day">DAY</button>
+  <button class="btn themeBtn" data-k="night">NIGHT</button>
+  <button class="btn themeBtn" data-k="normal">NORMAL</button>
+  <button class="btn btn-ghost" id="btnRoast">ROAST ME</button>
+  <button class="btn btn-ghost" id="btnAnnoy">DISABLE ANNOYANCES</button>
+</header>
+
+<main id="world" tabindex="0" aria-label="Profile — horizontally scrollable. Use arrow keys, or the pump below.">
+<div id="track">
+
+  <!-- 1. PROFILE HEADER -->
+  <section class="panel" id="pHeader" style="width:760px">
+    <div class="banner">BETTER THAN YOU SINCE BIRTH</div>
+    <div style="display:flex;gap:16px;align-items:flex-start;margin-top:-24px;padding:0 10px;flex-wrap:wrap">
+      <div class="avatar" id="avatar" title="definitely a real photo">CM</div>
+      <div style="flex:1;min-width:220px">
+        <h2 style="margin-top:26px">Certified Menace <button class="linklike" id="vBadge" style="color:var(--yellow);text-decoration:none;border:1px solid var(--yellow);padding:2px 8px;font-size:.7rem">✔ VERIFIED</button><span class="badge hidden" id="premBadge">PREMIUM ✓✓</span></h2>
+        <p class="small">@objectively_wrong</p>
+        <p style="font-size:.85rem;margin:8px 0">“I'm not always right. I'm just never wrong.”</p>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <button class="btn btn-red" id="followBtn">FOLLOW</button><span class="small" id="followTip">Follow</span>
+          <button class="btn" id="btnPremium">GO PREMIUM 💎</button>
+        </div>
+      </div>
+    </div>
+    <div class="statgrid" id="statBox">
+      <div class="stat"><b>69</b><span>POSTS</span></div>
+      <div class="stat"><b><button class="linklike" id="folCount" style="font-size:1.15rem;color:var(--yellow)">999K</button></b><span>FOLLOWERS (CLICK ME)</span></div>
+      <div class="stat"><b>0</b><span>FOLLOWING</span></div>
+      <div class="stat"><b>0</b><span>APOLOGIES</span></div>
+      <div class="stat"><b>4,209</b><span>ARGUMENTS WON</span></div>
+      <div class="stat"><b>Not found</b><span>HUMILITY LEVEL</span></div>
+    </div>
+    <p class="small">⚠ FICTIONAL PROFILE STATISTICS — not real platform metrics. Nothing here is real. Including our effort.</p>
+    <h3>CONFIDENCE METER</h3>
+    <div class="rmeter" style="width:100%"><div id="confFill" style="background:var(--yellow)"></div></div>
+    <p class="small" id="confPct">0% — fragile</p>
+  </section>
+
+  <!-- 2. PINNED POST + HOT TAKES + DERRICK -->
+  <section class="panel" id="pPinned" style="width:600px">
+    <h2>📌 PINNED POST</h2>
+    <div class="post">
+      <p class="small">@objectively_wrong · pinned by the council</p>
+      <p>Hot take: cereal is soup, and if you disagree you are legally a spoon.</p>
+      <button class="btn likebtn" data-like>LIKE 👍</button>
+      <p class="small" style="margin-top:8px;border-left:3px solid var(--yellow);padding-left:8px">
+      <b>COMMUNITY NOTE:</b> Cereal is not soup. Soup requires a social contract. This post contains 47 factual errors, all of them confident. Sources: a puddle.</p>
+    </div>
+    <h3>HOT TAKES 🔥</h3>
+    <div class="post"><p>🍍 Pineapple on pizza is a personality test. You failed.</p></div>
+    <div class="post"><p>📶 WiFi passwords should be emotional support.</p></div>
+    <div class="post"><p>🧱 The floor is the biggest shelf.</p></div>
+    <div class="post"><p>⌨️ Autocorrect is my ghostwriter and my enemy.</p></div>
+    <h3>INTERACTION ZONE</h3>
+    <div class="post"><p class="small">Derrick @derrick_exists · “happiness is a choice and I chose to be confused.”</p>
+      <button class="btn btn-red" id="btnDerrick">MESSAGE DERRICK</button></div>
+  </section>
+
+  <!-- 3. FEED -->
+  <section class="panel" id="pFeed" style="width:560px">
+    <h2>SOCIAL FEED</h2>
+    <div class="post"><p class="small">@objectively_wrong</p><p>Just finished an argument with myself. Won. Again. Undefeated.</p><button class="btn likebtn" data-like>LIKE 👍</button></div>
+    <div class="post"><p class="small">@objectively_wrong</p><p>Day 47 of pretending to understand NFTs.</p><button class="btn likebtn" data-like>LIKE 👍</button></div>
+    <div class="post"><p class="small">@objectively_wrong</p><p>Unpopular opinion: breathing is overrated. (I have stopped. Updates soon.)</p><button class="btn likebtn" data-like>LIKE 👍</button></div>
+    <p class="small">All likes are temporary. All opinions permanent.</p>
+  </section>
+
+  <!-- 4. COMMENTS -->
+  <section class="panel" id="pComments" style="width:560px">
+    <h2>COMMENTS (CONFIDENTLY WRONG)</h2>
+    <div id="cList">
+      <div class="post"><p class="small">@cereal_truther:</p><p>Bold of you to insult spoons, the most honorable utensil.</p></div>
+      <div class="post"><p class="small">@logic_enjoyer:</p><p>So you're saying soup is dry? Got it. Blocked.</p></div>
+      <div class="post"><p class="small">@fact_checker:</p><p>This is why aliens don't visit.</p></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px"><input id="cIn" placeholder="write something… it will be misunderstood" aria-label="write a comment"><button class="btn btn-red" id="cSend">POST</button></div>
+  </section>
+
+  <!-- 5. ADS -->
+  <section class="panel" id="pAds" style="width:620px">
+    <h2>SPONSORED DISAPPOINTMENTS</h2>
+    <div class="post"><p><b>Click here to improve your intelligence.</b></p><p class="small">Results not guaranteed. Or possible.</p><button class="btn adBtn" data-dest="IQ_PLUS_9000.exe">CLICK</button></div>
+    <div class="post"><p><b>Unlock premium opinions.</b></p><p class="small">Opinions certified by no one.</p><button class="btn adBtn" data-dest="PREMIUM_OPINIONS.zone">UNLOCK</button></div>
+    <div class="post"><p><b>You have won absolutely nothing.</b></p><p class="small">Claim now.</p><button class="btn adBtn" data-dest="NOTHING.png">CLAIM</button></div>
+    <div class="post"><p><b>Become verified instantly.</b></p><p class="small">Verification is decorative.</p><button class="btn adBtn" data-dest="VERIFIED_BADGE.cert">VERIFY</button></div>
+    <div class="post"><p><b>Claim your free personality.</b></p><p class="small">Limited stock. Zero left.</p><button class="btn adBtn" data-dest="PERSONALITY.zip">CLAIM</button></div>
+    <div class="post"><p><b>This link definitely does not Rickroll you.</b></p><button class="btn adBtn" data-dest="totally_not_rickroll.html">OPEN</button></div>
+    <div class="post" style="border-color:var(--yellow)">
+      <p><b>CLICK HERE FOR PREMIUM CONTENT 🔞</b></p>
+      <p class="small" title="Definitely not corn. Trust us.">Definitely not corn. Trust us.</p>
+      <button class="btn btn-red" id="cornBtn">CLICK HERE FOR PREMIUM CONTENT 🔞</button>
+    </div>
+  </section>
+
+  <!-- 6. POLL + COURTROOM -->
+  <section class="panel" id="pPoll" style="width:600px">
+    <h2>POLL</h2>
+    <p style="font-size:.9rem">WHO IS OBJECTIVELY THE MOST CORRECT?</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0">
+      <button class="btn voteBtn">Me</button><button class="btn voteBtn">Also me</button>
+      <button class="btn voteBtn">The quieter version of me</button><button class="btn voteBtn">Everyone who agrees with me</button>
+    </div>
+    <div id="pollBars"></div>
+    <h2 style="margin-top:22px">OPINION COURTROOM ⚖️</h2>
+    <p class="small">THE PEOPLE VS. YOUR OPINION. Enter your opinion as evidence.</p>
+    <div style="display:flex;gap:8px;margin:10px 0"><input id="courtIn" placeholder="your controversial opinion" aria-label="your opinion"><button class="btn btn-red" id="courtBtn">SUBMIT AS EVIDENCE</button></div>
+    <div id="courtOut"></div>
+  </section>
+
+  <!-- 7. FUN: APOLOGIES / ROAST / ACHIEVEMENTS -->
+  <section class="panel" id="pFun" style="width:620px">
+    <h2>APOLOGY GENERATOR</h2>
+    <button class="btn" id="btnApology">GENERATE APOLOGY</button>
+    <div class="post" id="apologyOut">Press the button. Cowardice detected so far: 0.</div>
+    <h2>ACHIEVEMENTS</h2>
+    <div class="achgrid" id="achGrid"></div>
+  </section>
+
+  <!-- 8. BRYCE -->
+  <section class="panel" id="pBryce" style="width:620px">
+    <h2>MEGAPHONE PRESENTS</h2>
+    <div class="post bryce-post" id="brycePost">
+      <p class="small">Bryce @bryce_has_opinions</p>
+      <p class="btext">Actually, my opinion is objectively correct, and everyone else is wrong.</p>
+      <button class="btn btn-red" id="btnMute">MUTE BRYCE</button>
+      <button class="linklike hidden" id="btnUnmute">UNMUTE BRYCE</button>
+      <label class="small" style="display:block;margin-top:8px"><input type="checkbox" id="soundToggle" style="width:auto"> enable horn sound (WebAudio, opt-in, never autoplays)</label>
+    </div>
+    <div id="bryceBanner" class="hidden">Muted. Now Bryce posts louder so you can hear him not talking.</div>
+  </section>
+
+  <!-- 9. SETTINGS — FINAL BOSS -->
+  <section class="panel" id="pSettings" style="width:600px">
+    <h2>PROFILE SETTINGS — THE FINAL BOSS</h2>
+    <div style="display:grid;gap:8px">
+      <button class="btn" id="stUser">CHANGE USERNAME</button>
+      <button class="btn" id="stBio">EDIT BIO</button>
+      <button class="btn" id="stHum">ENABLE HUMILITY</button>
+      <button class="btn" id="stReset">RESET STATISTICS</button>
+      <button class="btn btn-red" id="stDelete">DELETE PROFILE</button>
+      <button class="btn btn-ghost" id="stSession">CHECK SESSION STATUS</button>
+    </div>
+    <p class="small" style="margin-top:10px">No setting here does what it says. That is the setting.</p>
+  </section>
+
+  <!-- 10. SUPPORT -->
+  <section class="panel" id="pSupport" style="width:560px">
+    <h2>CUSTOMER SUPPORT</h2>
+    <div class="chatlog" id="chatLog"><p><b>SUPPORT-9000:</b> Hello. You are speaking with SUPPORT-9000, a fully certified human person.</p></div>
+    <div style="display:flex;gap:8px"><input id="chatIn" placeholder="describe your problem" aria-label="message support"><button class="btn btn-red" id="chatSend">SEND</button></div>
+  </section>
+
+  <!-- 11. FINAL BOSS -->
+  <section class="panel" id="pFinal" style="width:720px">
+    <h2 style="font-size:1.4rem">YOU HAVE SURVIVED RAGE//SOCIAL.</h2>
+    <p class="small">“Against all odds, you have reached the end of the internet.”</p>
+    <h3>SURVIVAL SCORE (fictional, in-page only, definitely not analytics)</h3>
+    <div class="statgrid">
+      <div class="stat"><b id="fRage">0%</b><span>TOTAL RAGE</span></div>
+      <div class="stat"><b id="fAds">0</b><span>FAKE ADS OPENED</span></div>
+      <div class="stat"><b id="fPops">0</b><span>POPUPS DISMISSED</span></div>
+      <div class="stat"><b id="fPump">0</b><span>PUMP INTERACTIONS</span></div>
+      <div class="stat"><b id="fEggs">0/6</b><span>EASTER EGGS FOUND</span></div>
+    </div>
+    <h3>TERMS OF SERVICE (fake, like everything)</h3>
+    <ul class="small" style="line-height:1.8;list-style:square;padding-left:18px">
+      <li>You waive the right to complain about a button doing exactly what it says.</li>
+      <li>The council accepts no responsibility for lost brain cells.</li>
+      <li>By continuing, you acknowledge that the corn was, in fact, corn.</li>
+      <li>All statistics are fictional, including this sentence.</li>
+    </ul>
+    <h2 style="margin-top:20px" id="finalReveal" class="small">…</h2>
+    <button class="btn btn-red" id="btnEscape" style="font-size:1.1rem;padding:16px 26px">ESCAPE THE INTERNET</button>
+  </section>
+
+</div>
+</main>
+
+<!-- PUMP DOCK -->
+<footer id="pumpDock">
+  <div class="gauge" aria-hidden="true"><div id="gFill"></div></div>
+  <span class="small" id="pPct">100%</span>
+  <button class="btn btn-red" id="btnPump">PUMP 💨</button>
+  <button class="btn" id="btnPause">PAUSE</button>
+  <button class="btn btn-ghost" id="btnPumpReset">RESET</button>
+  <button class="btn btn-ghost" id="btnPumpOff">DISABLE PUMP — NORMAL SCROLLING</button>
+  <p id="pumpMsg">Pressure stable. For now. Scroll with wheel / drag / arrow keys — or lose pressure and suffer.</p>
+</footer>
+
+<div id="deflateFlash">YOUR SCROLLING PRIVILEGES HAVE EXPIRED.</div>
+<div id="cookieHost"></div>
+<button class="btn hidden" id="closeAllCookies">CLOSE ALL COOKIES</button>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<div id="popHost"></div>
+
+<!-- INTERSTITIAL -->
+<div class="overlay hidden" id="intOverlay" role="dialog" aria-modal="true">
+  <div class="modal center">
+    <h2>LOADING <span id="intDest"></span></h2>
+    <div class="bar"><div id="intBar"></div></div>
+    <p class="small" id="intStatus" style="margin:8px 0">Connecting to premium server…</p>
+    <div id="intReveal" class="hidden">
+      <p style="color:var(--yellow);font-weight:900;font-size:1.1rem">HAHAHA, YOU GOT FOOLED AGAIN. TRY ANOTHER LINK.</p>
+      <div class="row" style="justify-content:center;margin-top:12px"><button class="btn btn-red" id="intReturn">RETURN TO WHERE YOU WERE</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- CORN -->
+<div class="overlay hidden" id="cornOverlay" role="dialog" aria-modal="true" aria-label="Premium content">
+  <div class="modal corn-wrap center">
+    <div id="cornLoad">
+      <div class="spin"></div>
+      <p style="font-size:.8rem">redirecting_to_premium_content.exe</p>
+      <div class="bar" style="border-color:#0f0;background:#020"><div id="cornBar" style="background:#0f0"></div></div>
+      <p id="cornStatus" style="margin-top:8px;font-size:.85rem">Verifying your age…</p>
+    </div>
+    <div id="cornReveal" class="hidden">
+      <p style="font-weight:900;font-size:1.1rem">YOU HAVE BEEN REDIRECTED TO THE *ORN WEBSITE.</p>
+      <p style="font-size:.85rem">Congratulations. You played yourself.</p>
+      <div id="cornImgWrap"><img src="assets/corn.png" alt="The corn you were promised" id="cornImg"></div>
+      <p id="cornCap" style="font-weight:900">PREMIUM CORN™</p>
+      <p style="font-size:.8rem">100% organic.<br>0% inappropriate.<br>1000% disappointment.</p>
+      <p class="blink2" style="font-size:.8rem">★★★★★ — 69,420 disappointed customers</p>
+      <div class="row" style="justify-content:center;margin-top:10px">
+        <button class="btn" id="btnMoney">I WANT MY MONEY BACK</button>
+        <button class="btn" id="btnMore">SHOW ME MORE</button>
+        <button class="btn btn-red" id="btnReality">RETURN TO REALITY</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DERRICK -->
+<div class="overlay hidden" id="derrickModal" role="dialog" aria-modal="true">
+  <div class="modal center">
+    <h2>DERRICK HAPPINESS CAPTCHA</h2>
+    <div id="derStep1">
+      <p class="small">Select the face that proves maximum happiness:</p>
+      <div class="row" style="justify-content:center;margin-top:10px">
+        <button class="btn derFace" style="font-size:1.6rem">😐</button>
+        <button class="btn derFace" style="font-size:1.6rem">🙃</button>
+        <button class="btn derFace" style="font-size:1.6rem" data-ok>😊</button>
+      </div>
+    </div>
+    <div id="derStep2" class="hidden"><p style="font-size:1.1rem">Derrick is typing<span id="derDots">…</span></p></div>
+    <div id="derStep3" class="hidden">
+      <p style="font-weight:900">Derrick has been typing for 47 business days.</p>
+      <div class="row" style="justify-content:center;margin-top:10px"><button class="btn btn-red" id="derStop">STOP WAITING</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM -->
+<div class="overlay hidden" id="delModal" role="dialog" aria-modal="true">
+  <div class="modal center"><h2>DELETE PROFILE</h2>
+    <p style="margin:10px 0">Are you sure you want to delete the greatest profile in human history?</p>
+    <div class="row" style="justify-content:center">
+      <button class="btn btn-red" id="delYes">YES, DELETE GREATNESS</button>
+      <button class="btn" id="delNo">NO, I RESPECT GREATNESS</button>
+    </div></div>
+</div>
+
+<!-- SESSION -->
+<div class="overlay hidden" id="sessModal" role="dialog" aria-modal="true">
+  <div class="modal center"><h2>SESSION STATUS</h2>
+    <p style="margin:10px 0">SESSION EXPIRED. It actually expired before you opened this page. Impressive.</p>
+    <div class="row" style="justify-content:center">
+      <button class="btn btn-red" id="sessBack">RETURN TO LOGIN</button>
+      <button class="btn" id="sessStay">STAY AND SUFFER</button>
+    </div></div>
+</div>
+
+<!-- COUNCIL -->
+<div class="overlay hidden" id="councilModal" role="dialog" aria-modal="true">
+  <div class="modal"><h2>🕯 COUNCIL OF QUESTIONABLE DECISIONS — MINUTES OF MEETING</h2>
+    <ul class="small" style="line-height:2;list-style:square;padding-left:18px">
+      <li>Motion to make the scrollbar inflatable: PASSED unanimously.</li>
+      <li>Motion to explain the username rules: DENIED forever.</li>
+      <li>Motion to add a 13th password rule: tabled for next Tuesday.</li>
+      <li>Attendance: 4 humans, 1 toaster (under review).</li>
+    </ul>
+    <div class="row" style="justify-content:center;margin-top:10px"><button class="btn" id="councilClose">LEAVE THE COUNCIL</button></div></div>
+</div>
+
+<!-- NOTIFICATIONS -->
+<div class="overlay hidden" id="notifModal" role="dialog" aria-modal="true">
+  <div class="modal"><h2>NOTIFICATIONS (all fictional)</h2>
+    <div id="notifList" class="small" style="line-height:2"></div>
+    <div class="row" style="justify-content:center;margin-top:10px"><button class="btn" id="notifClose">IGNORE EVERYTHING</button></div></div>
+</div>
+
+<!-- PREMIUM -->
+<div class="overlay hidden" id="premiumModal" role="dialog" aria-modal="true">
+  <div class="modal center"><h2>PREMIUM™</h2>
+    <div class="bar" style="margin:10px 0"><div id="premBar"></div></div>
+    <div id="premReveal" class="hidden">
+      <p>Welcome to <b>PREMIUM™</b>. You now have access to: <b>nothing new.</b></p>
+      <p class="small">Your bank account: unchanged. Your ego: +2.</p>
+      <div class="row" style="justify-content:center;margin-top:10px"><button class="btn btn-red" id="premClose">ENJOY NOTHING</button></div>
+    </div></div>
+</div>
+
+<!-- 3-STEP CONFIRM -->
+<div class="overlay hidden" id="confirmModal" role="dialog" aria-modal="true">
+  <div class="modal center"><h2>CONFIRMATION</h2>
+    <p id="confText" style="margin:12px 0;font-weight:900"></p>
+    <div class="row" style="justify-content:center">
+      <button class="btn btn-red" id="confYes">YES</button>
+      <button class="btn" id="confNo">NO</button>
+    </div></div>
+</div>
+
+<!-- ESCAPE -->
+<div class="overlay hidden" id="escapeModal" role="dialog" aria-modal="true">
+  <div class="modal center"><h2>ESCAPE THE INTERNET</h2>
+    <p style="font-weight:900;margin:12px 0">CONGRATULATIONS. YOU HAVE SUCCESSFULLY DONE ABSOLUTELY NOTHING.</p>
+    <p class="small">This has been a RAGE//SOCIAL production. No data was harmed.</p>
+    <div class="row" style="justify-content:center;margin-top:10px"><button class="btn btn-red" id="escBack">TAKE ME BACK TO SUFFERING</button></div></div>
+</div>
+
+<script>
+"use strict";
+(function(){
+const $=(s,c=document)=>c.querySelector(s), $$=(s,c=document)=>[...c.querySelectorAll(s)];
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const world=$('#world');
+const S={annoy:true,notifOpen:false,ads:0,pops:0,eggs:new Set(),ach:new Set(),conf:0,rage:0,hell:false,tSw:0,lastIdentity:0,voted:false,avatarN:0,logoN:0};
+const timers=[]; const later=(fn,ms)=>{const t=setTimeout(fn,ms);timers.push(t);return t;};
+const every=(fn,ms)=>{const t=setInterval(fn,ms);timers.push(t);return t;};
+window.addEventListener('beforeunload',()=>{timers.forEach(t=>{clearTimeout(t);clearInterval(t);});});
+
+function toast(msg,cls){const t=document.createElement('div');t.className='toast '+(cls||'');t.textContent=msg;$('#toasts').appendChild(t);setTimeout(()=>t.remove(),4200);}
+
+/* ============ ACHIEVEMENTS + EGGS ============ */
+const ACHS=[['das','DAS IT? — dismissed 3 popups'],['farmer','FARMER — got corned'],['hotair','HOT AIR — expired scrolling privileges'],
+ ['noise','NOISE COMPLAINT — muted Bryce'],['unfollow','UNFOLLOWED — destroyed 999K followers'],['max','MAXIMUM UNPRODUCTIVITY'],
+ ['avatar','AVATAR ABUSER'],['council','COUNCIL MEMBER'],['days','47 BUSINESS DAYS — waited for Derrick'],
+ ['counsel','COUNSEL — lost your own trial'],['ego','UNBREAKABLE EGO'],['premium','PREMIUM VICTIM']];
+const achGrid=$('#achGrid');
+ACHS.forEach(([id,name])=>{const d=document.createElement('div');d.className='ach';d.dataset.ach=id;d.textContent='🔒 '+name;achGrid.appendChild(d);});
+function unlockAch(id){if(S.ach.has(id))return;S.ach.add(id);const el=$('.ach[data-ach="'+id+'"]');if(el){el.classList.add('got');el.textContent='🏆 '+el.textContent.slice(2);}
+ const name=(ACHS.find(a=>a[0]===id)||[,'???'])[1];toast('🏆 ACHIEVEMENT UNLOCKED: '+name,'good');}
+function unlockEgg(id,label){if(S.eggs.has(id))return;S.eggs.add(id);toast('🥚 EASTER EGG: '+label,'good');updateFinal();}
+function updateFinal(){$('#fRage').textContent=S.rage+'%';$('#fAds').textContent=S.ads;$('#fPops').textContent=S.pops;
+ $('#fPump').textContent=S.pumps;$('#fEggs').textContent=S.eggs.size+'/6';}
+
+/* ============ RAGE METER + HELL MODE ============ */
+function addRage(n){if(S.hell)return;S.rage=Math.min(100,S.rage+n);
+ $('#rFill').style.width=S.rage+'%';$('#rPct').textContent='RAGE '+S.rage+'%';updateFinal();
+ if(S.rage>=100){S.hell=true;document.body.classList.add('hell');
+  toast('CONGRATULATIONS. YOU HAVE ACHIEVED MAXIMUM UNPRODUCTIVITY.','good');unlockAch('max');
+  $('#rPct').textContent='RAGE 100% (HELL)';}}
+ $('#rFill').parentElement.insertAdjacentHTML('afterend','<button class="btn btn-ghost hidden" id="exitHell">EXIT HELL MODE</button>');
+ $('#exitHell').onclick=()=>{S.hell=false;document.body.classList.remove('hell');$('#exitHell').classList.add('hidden');toast('Hell mode exited. The demons are disappointed.');};
+
+/* ============ POPUP DISMISSAL / CONFIDENCE ============ */
+function countPop(){S.pops++;S.conf=Math.min(100,S.conf+4);
+ $('#confFill').style.width=S.conf+'%';$('#confPct').textContent=S.conf+'% — '+(S.conf<40?'fragile':S.conf<100?'concerningly confident':'unbreakable');updateFinal();
+ if(S.conf>=100)unlockAch('ego');if(S.pops>=3)unlockAch('das');addRage(1);}
+
+/* ============ ROASTS ============ */
+const ROASTS=['Your browser has more tabs open than your mind.','Your confidence is doing unpaid overtime.',
+ 'You have the energy of a semicolon missing from a Java program.','Your last brain cell has requested annual leave.',
+ 'You are not wrong. You are just running a different version of reality.'];
+ $('#btnRoast').onclick=()=>toast(ROASTS[Math.floor(Math.random()*ROASTS.length)],'warn');
+
+/* ============ THEMES ============ */
+const THEMES={day:['day','Welcome to the surface of the sun.'],night:['night','Welcome back to civilization.'],normal:['','Congratulations. You have discovered the concept of normality.']};
+ $$('.themeBtn').forEach(b=>b.onclick=()=>{const k=b.dataset.k;document.documentElement.dataset.theme=THEMES[k][0];
+ toast(THEMES[k][1]);S.tSw++;addRage(1);
+ if(S.tSw>3&&Date.now()-S.lastIdentity>10000){toast('Bro is having an identity crisis.');S.lastIdentity=Date.now();}});
+
+/* ============ BRYCE MEGAPHONE ============ */
+ $('#btnMute').onclick=()=>{document.body.classList.add('loud');$('#bryceBanner').classList.remove('hidden');
+ $('#btnMute').classList.add('hidden');$('#btnUnmute').classList.remove('hidden');unlockAch('noise');addRage(3);
+ if($('#soundToggle').checked)horn();};
+function unmute(){document.body.classList.remove('loud');$('#bryceBanner').classList.add('hidden');
+ $('#btnUnmute').classList.add('hidden');$('#btnMute').classList.remove('hidden');}
+ $('#btnUnmute').onclick=unmute;
+function horn(){try{const ac=new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();
+ o.type='square';o.frequency.setValueAtTime(130,ac.currentTime);o.frequency.exponentialRampToValueAtTime(60,ac.currentTime+.5);
+ g.gain.setValueAtTime(.15,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.5);
+ o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+.55);}catch(e){}}
+
+/* ============ FOLLOWER SABOTAGE ============ */
+const MS=[[999000,'999K'],[420000,'420K'],[69000,'69K'],[4209,'4,209'],[420,'420'],[69,'69'],[0,'0']];
+const FMSG=[null,'Your followers are reconsidering their decisions.','Someone remembered your opinions.',
+ 'The council is reviewing your social standing.','Your influence has left the chat.','Nice.','…and gone. Like your relevance.'];
+let mi=0,busy=false;
+function fmt(v){if(v>=10000)return Math.round(v/1000)+'K';return Math.round(v).toLocaleString('en-US');}
+function tween(a,b,cb){const t0=performance.now(),el=$('#folCount');(function f(t){const p=Math.min(1,(t-t0)/700);
+ el.textContent=fmt(a+(b-a)*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f);else cb();})(t0);}
+ $('#folCount').onclick=()=>{if(busy)return;if(mi>=MS.length-1){toast('There is nothing left to destroy. Impressive.');return;}
+ busy=true;mi++;addRage(2);tween(MS[mi-1][0],MS[mi][0],()=>{$('#folCount').textContent=MS[mi][1];toast(FMSG[mi],mi===6?'warn':'warn');busy=false;if(mi===6)unlockAch('unfollow');});};
+const rst=document.createElement('button');rst.className='btn btn-ghost';rst.textContent='RESET FOLLOWERS';rst.style.marginTop='6px';
+ $('#folCount').closest('.stat').appendChild(rst);
+rst.onclick=()=>{if(busy)return;busy=true;tween(MS[mi][0],999000,()=>{mi=0;$('#folCount').textContent='999K';toast('Greatness restored. Artificially.','good');busy=false;});};
+
+/* ============ VANISHING LIKES ============ */
+ $$('[data-like]').forEach(b=>b.addEventListener('click',()=>{
+ if(b.dataset.busy)return;b.dataset.busy=1;b.classList.add('on');b.textContent='LIKED ✓';addRage(2);
+ setTimeout(()=>{b.classList.remove('on');b.textContent='LIKE 👍';delete b.dataset.busy;toast('Derrick has revoked your approval.','warn');},2000);}));
+
+/* ============ IMPOSSIBLE FOLLOW BUTTON ============ */
+const follow=$('#followBtn');let dodges=0;
+const tips=['Follow','Unfollow','Follow?','Why?','No, follow','ok whatever','FOLLOW (real)'];let tipI=0,tipT=null;
+follow.addEventListener('pointerenter',()=>{clearInterval(tipT);tipI=0;
+ tipT=setInterval(()=>{$('#followTip').textContent=tips[tipI++%tips.length];},600);
+ if(dodges<3){dodges++;follow.style.transform='translate('+(Math.random()*120-60)+'px,'+(Math.random()*44-22)+'px)';
+  toast(['Too slow.','Nope.','Catch me outside.'][dodges-1],'warn');}});
+follow.addEventListener('pointerleave',()=>{clearInterval(tipT);$('#followTip').textContent='Follow';});
+follow.addEventListener('focus',()=>follow.style.transform='');
+function followSuccess(){follow.classList.add('on');follow.textContent='FOLLOWING ✓';follow.style.transform='';addRage(2);
+ setTimeout(()=>{follow.classList.remove('on');follow.textContent='FOLLOW';toast('You were following for a moment. We are proud of you.','good');},2000);}
+follow.addEventListener('click',e=>{if(e.detail===0||dodges>=3)followSuccess();else{dodges++;toast('Click denied. The button has trust issues.','warn');}});
+
+/* ============ FAKE ADS + INTERSTITIAL ============ */
+let savedScroll=0;
+function interstitial(dest){savedScroll=world.scrollLeft;S.ads++;addRage(5);updateFinal();
+ const ov=$('#intOverlay');ov.classList.remove('hidden');$('#intReveal').classList.add('hidden');$('#intDest').textContent=dest;
+ const st=$('#intStatus');const msgs=['Connecting to premium server…','Buffering disappointment…','Compiling excuses…','Almost…'];let i=0,p=0;
+ st.textContent=msgs[0];const iv=setInterval(()=>{p+=5;$('#intBar').style.width=p+'%';
+  if(p%15===0)st.textContent=msgs[++i%msgs.length];
+  if(p>=100){clearInterval(iv);st.textContent='Destination reached: absolutely nowhere.';$('#intReveal').classList.remove('hidden');}},70);
+ ov.dataset.iv=iv;}
+ $('#intReturn').onclick=()=>{const ov=$('#intOverlay');clearInterval(ov.dataset.iv);ov.classList.add('hidden');$('#intBar').style.width='0%';world.scrollLeft=savedScroll;};
+ $$('.adBtn').forEach(b=>b.onclick=()=>{if(b.dataset.dest==='totally_not_rickroll.html'){savedScroll=world.scrollLeft;interstitial(b.dataset.dest);
+ $('#intStatus').textContent='It was, in fact, a rickroll-shaped lie. The real rickroll lives behind the Googlie button on the login page.';}
+ else interstitial(b.dataset.dest);});
+
+/* ============ 🌽 CORN PRANK ============ */
+let cornState={open:false,more:false};
+ $('#cornBtn').onclick=()=>{savedScroll=world.scrollLeft;cornState.open=true;addRage(10);unlockAch('farmer');
+ world.style.overflow='hidden';$('#cornOverlay').classList.remove('hidden');$('#cornReveal').classList.add('hidden');$('#cornLoad').classList.remove('hidden');
+ cornState.more=false;$('#cornCap').textContent='PREMIUM CORN™';
+ const st=$('#cornStatus');const msgs=['Verifying your age…','Checking your questionable decisions…','Establishing secure connection…','Redirecting to *orn website…','Almost there. There is no going back.'];
+ let p=0,i=0;st.textContent=msgs[0];
+ const iv=setInterval(()=>{p+=3;$('#cornBar').style.width=p+'%';const step=Math.min(4,Math.floor(p/20));
+  if(step!==i){i=step;st.textContent=msgs[i];}
+  if(p>=100){clearInterval(iv);later(()=>{$('#cornLoad').classList.add('hidden');$('#cornReveal').classList.remove('hidden');},350);}},90);
+ $('#cornOverlay').dataset.iv=iv;};
+function cornFallback(img){img.outerHTML='<svg width="260" height="200" viewBox="0 0 100 80" role="img" aria-label="emergency backup corn"><ellipse cx="50" cy="40" rx="18" ry="34" fill="#ffd60a" stroke="#b8860b" stroke-width="2"/><path d="M50 6 L50 74 M40 12 L40 70 M60 12 L60 70" stroke="#b8860b" stroke-width="1.2"/><path d="M28 20 Q50 8 72 20 Q60 32 28 20 M28 60 Q50 74 72 60 Q60 48 28 60" fill="#39ff14" opacity=".9"/><text x="50" y="46" font-size="7" text-anchor="middle" fill="#8a6d00">CORN</text></svg><p class="small">(assets/corn.png not found — deploying emergency backup corn)</p>';}
+ $('#cornImg').addEventListener('error',()=>cornFallback($('#cornImg')));
+function closeCorn(){$('#cornOverlay').classList.add('hidden');clearInterval($('#cornOverlay').dataset.iv);
+ world.style.overflow='';world.scrollLeft=savedScroll;cornState.open=false;}
+ $('#btnMoney').onclick=()=>toast('You paid nothing. You still want a refund?','warn');
+ $('#btnMore').onclick=()=>{cornState.more=!cornState.more;$('#cornCap').textContent='More corn. Less dignity.';};
+ $('#btnReality').onclick=closeCorn;
+
+/* ============ DERRICK CAPTCHA ============ */
+ $('#btnDerrick').onclick=()=>{$('#derrickModal').classList.remove('hidden');$('#derStep1').classList.remove('hidden');$('#derStep2').classList.add('hidden');$('#derStep3').classList.add('hidden');};
+ $$('.derFace').forEach(b=>b.onclick=()=>{if(!b.dataset.ok){toast('That is not happiness. That is coping.','warn');return;}
+ $('#derStep1').classList.add('hidden');$('#derStep2').classList.remove('hidden');
+ let n=0;const dt=setInterval(()=>{$('#derDots').textContent='.'.repeat(1+(n++%3));},300);
+ later(()=>{clearInterval(dt);$('#derStep2').classList.add('hidden');$('#derStep3').classList.remove('hidden');unlockAch('days');addRage(3);},4000);});
+ $('#derStop').onclick=()=>{$('#derrickModal').classList.add('hidden');countPop();toast('Derrick will finish typing eventually. Probably.');};
+
+/* ============ POLL (every option wrong) ============ */
+const pollLabels=['Me','Also me','The quieter version of me','Everyone who agrees with me'];
+function renderPoll(){$('#pollBars').innerHTML='';pollLabels.forEach((l,i)=>{const w=i===0?100:0;
+ $('#pollBars').insertAdjacentHTML('beforeend','<p class="small">'+l+' — '+(i===0?'100%':'0%')+'</p><div class="pollbar"><div style="width:'+w+'%"></div></div>');});}
+ $$('.voteBtn').forEach(b=>b.onclick=()=>{if(!S.voted){S.voted=true;renderPoll();toast('Wrong. You had one job.','warn');}
+ else toast('You can vote again. It will not help.','warn');addRage(2);});
+
+/* ============ COURTROOM ============ */
+ $('#courtBtn').onclick=()=>{const v=$('#courtIn').value.trim();if(!v){toast('The court cannot try an empty head.','warn');return;}
+ $('#courtIn').value='';const out=$('#courtOut');out.innerHTML='';
+ const lines=['CASE #42069 OPENED.','The prosecution calls your search history.','OBJECTION! Overruled. Objections are for people with evidence.'];
+ const verdicts=['GUILTY. Sentence: mandatory grass-touching.','GUILTY. Your opinion has been relocated to the shadow realm.','NOT GUILTY. Just kidding. GUILTY.','GUILTY of first-degree confidence.'];
+ lines.forEach((l,i)=>later(()=>{out.insertAdjacentHTML('beforeend','<p class="small">⚖️ '+l+'</p>');},i*700));
+ later(()=>{out.insertAdjacentHTML('beforeend','<p style="color:var(--red);font-weight:900">⚖️ VERDICT: '+verdicts[Math.floor(Math.random()*verdicts.length)]+'</p>');unlockAch('counsel');addRage(3);},lines.length*700+400);};
+
+/* ============ APOLOGY GENERATOR ============ */
+const APOLOGIES=['I\'m sorry you feel that way. Legally, that is an apology.','I apologize for nothing. This message was auto-generated by regret.exe.',
+ 'I\'m sorry, but the council has reviewed your feelings and denied them.','Sorry. Not in a meaningful way. In a contractual way.',
+ 'I regret arriving at this conclusion. I do not regret the conclusion.','The management apologizes for the inconvenience. You are the inconvenience.'];
+let apI=0,apN=0;
+ $('#btnApology').onclick=()=>{apN++;$('#apologyOut').textContent='('+apN+') '+APOLOGIES[apI++%APOLOGIES.length];};
+
+/* ============ SUPPORT CHAT (cardboard box) ============ */
+const REPLIES=['Have you tried turning yourself off and on again?','Your issue has been escalated to a team that does not exist.',
+ 'Thank you for your patience. It will not be rewarded.','Analyzing your problem… it sounds like a you problem.','I am a cardboard box. Have a great day.'];
+let rp=0;
+function send(){const v=$('#chatIn').value.trim();if(!v)return;$('#chatIn').value='';
+ const log=$('#chatLog');log.insertAdjacentHTML('beforeend','<p><b>YOU:</b> '+v.replace(/</g,'&lt;')+'</p>');
+ later(()=>{const r=REPLIES[Math.min(rp++,REPLIES.length-1)];
+  log.insertAdjacentHTML('beforeend','<p><b>SUPPORT-9000:</b> '+r+'</p>');log.scrollTop=log.scrollHeight;
+  if(rp>=REPLIES.length){rp=1;log.insertAdjacentHTML('beforeend','<p class="small">SUPPORT-9000 has been reassigned. You are now chatting with BOX-2.</p>');}
+  log.scrollTop=log.scrollHeight;},900);log.scrollTop=log.scrollHeight;}
+ $('#chatSend').onclick=send;$('#chatIn').addEventListener('keydown',e=>{if(e.key==='Enter')send();});
+
+/* ============ SETTINGS — FINAL BOSS ============ */
+ $('#stUser').onclick=()=>toast('Your username is already embarrassing enough.','warn');
+ $('#stBio').onclick=()=>toast('The current bio is already a masterpiece.','warn');
+ $('#stHum').onclick=()=>toast('Feature unavailable in your region.','warn');
+ $('#stReset').onclick=()=>toast('You cannot reset greatness.','warn');
+ $('#stDelete').onclick=()=>$('#delModal').classList.remove('hidden');
+ $('#delYes').onclick=()=>{$('#delModal').classList.add('hidden');toast('Deleting greatness… ERROR: nothing was deleted. Greatness is load-bearing.','good');addRage(2);};
+ $('#delNo').onclick=()=>{$('#delModal').classList.add('hidden');toast('Correct answer. Greatness remains untouched.','good');};
+ $('#stSession').onclick=()=>$('#sessModal').classList.remove('hidden');
+ $('#sessBack').onclick=()=>location.href='index.html';
+ $('#sessStay').onclick=()=>{$('#sessModal').classList.add('hidden');toast('Wise. The session is fake anyway.','good');};
+
+/* ============ PREMIUM ============ */
+ $('#btnPremium').onclick=()=>{$('#premiumModal').classList.remove('hidden');$('#premReveal').classList.add('hidden');let p=0;
+ const iv=setInterval(()=>{p+=10;$('#premBar').style.width=p+'%';if(p>=100){clearInterval(iv);$('#premReveal').classList.remove('hidden');
+  $('#premBadge').classList.remove('hidden');unlockAch('premium');addRage(2);}},120);};
+ $('#premClose').onclick=()=>{$('#premiumModal').classList.add('hidden');$('#premBar').style.width='0%';};
+
+/* ============ 3-STEP CONFIRM (used by cookie CUSTOMIZE) ============ */
+function confirm3(cb){const steps=['Are you sure?','Are you sure you\'re sure?','Final answer. No takebacks?'];let i=0;
+ $('#confText').textContent=steps[0];$('#confirmModal').classList.remove('hidden');
+ $('#confYes').onclick=()=>{i++;if(i<steps.length)$('#confText').textContent=steps[i];else{$('#confirmModal').classList.add('hidden');cb();}};
+ $('#confNo').onclick=()=>{$('#confirmModal').classList.add('hidden');toast('Wise. Rare.','good');};}
+
+/* ============ COOKIE BANNER MULTIPLICATION ============ */
+const COOKIE_T=['We use cookies to enhance your suffering. And track your disappointment.',
+ 'These cookies are raisins. Rejecting them is statistically impossible.',
+ 'COOKIE OVERLORD: your rejection has been forwarded to a shredder labeled "requests".',
+ 'Final banner. It self-replicates if rejected. Please just click something.'];
+let cookiesSpawned=0;
+function spawnCookie(){if(cookiesSpawned>=COOKIE_T.length)return;const txt=COOKIE_T[cookiesSpawned++];
+ const el=document.createElement('div');el.className='cookie';
+ el.innerHTML='<h4>🍪 COOKIE CONSENT #'+cookiesSpawned+'</h4><p>'+txt+'</p>';
+ const row=document.createElement('div');row.className='row';el.appendChild(row);
+ const a=document.createElement('button');a.className='btn';a.textContent='ACCEPT ALL';
+ const r=document.createElement('button');r.className='btn btn-ghost';r.textContent='REJECT ALL';
+ const c=document.createElement('button');c.className='btn btn-ghost';c.textContent='CUSTOMIZE';
+ row.append(a,r,c);$('#cookieHost').appendChild(el);
+ const kill=()=>{el.remove();countPop();syncCloseAll();};
+ a.onclick=()=>{toast('Accepted. Bold. Wrong, but bold.','warn');kill();};
+ r.onclick=()=>{if($('#cookieHost').children.length<4){later(spawnCookie,250);toast('Your rejection has been filed under "requests".','warn');}
+  else{toast('Fine. No cookies. There were never any cookies. There was never an us.','good');}kill();};
+ c.onclick=()=>confirm3(()=>{kill();toast('Customization saved. We chose for you.','warn');});
+ syncCloseAll();}
+function syncCloseAll(){$('#closeAllCookies').classList.toggle('hidden',$('#cookieHost').children.length<2);}
+ $('#closeAllCookies').onclick=()=>{$('#cookieHost').innerHTML='';syncCloseAll();toast('All cookies closed. Zero crumbs. Zero real cookies.','good');};
+later(spawnCookie,2500);
+
+/* ============ ANNOYING POPUPS (popHost) ============ */
+const POPS=['Are you sure you\'re intelligent enough to continue?','Your opinion has been rejected.','Skill issue detected.',
+ 'Calculating your intelligence…','Your subscription to common sense has expired.','The council has denied your request.',
+ 'Please remain calm. This is a fictional website.','We noticed you are enjoying yourself. Correcting that.'];
+const CORNERS=[[14,null,14,null],[null,14,14,null],[14,null,null,110],[null,14,null,110]];
+every(()=>{if(!S.annoy||document.hidden||$('#popHost').children.length>=2)return;
+ const el=document.createElement('div');el.className='pop';const ci=Math.floor(Math.random()*4);
+ el.style.top=CORNERS[ci][0]!==null?CORNERS[ci][0]+'px':'auto';el.style.right=CORNERS[ci][1]!==null?CORNERS[ci][1]+'px':'auto';
+ el.style.bottom=CORNERS[ci][2]!==null?CORNERS[ci][2]+'px':'auto';el.style.left=CORNERS[ci][3]!==null?CORNERS[ci][3]+'px':'auto';
+ const x=document.createElement('button');x.className='btn x';x.textContent='✕';x.setAttribute('aria-label','close popup');
+ const p=document.createElement('p');p.textContent=POPS[Math.floor(Math.random()*POPS.length)];
+ el.append(x,p);$('#popHost').appendChild(el);x.onclick=()=>{el.remove();countPop();};},22000);
+
+/* ============ NOTIFICATIONS THAT GROW WHEN IGNORED ============ */
+let notifN=3;
+every(()=>{if(!S.annoy||S.notifOpen||notifN>=99)return;notifN++;const el=$('#notifCount');el.textContent=notifN;
+ el.classList.add('bump');setTimeout(()=>el.classList.remove('bump'),300);},12000);
+const NOTIFS=['Bryce liked your post. Bryce likes everything. Bryce is lonely.','Someone viewed your profile. It was you.',
+ 'Your argument streak continues: 4,210.','Derrick has finished typing. He wrote: "k".','The council has reviewed your vibes. Denied.'];
+ $('#btnNotifs').onclick=()=>{S.notifOpen=true;const l=$('#notifList');l.innerHTML='';
+ NOTIFS.sort(()=>Math.random()-.5).forEach(n=>l.insertAdjacentHTML('beforeend','<p>🔔 '+n+'</p>'));
+ $('#notifModal').classList.remove('hidden');};
+ $('#notifClose').onclick=()=>{$('#notifModal').classList.add('hidden');S.notifOpen=false;notifN=0;$('#notifCount').textContent=0;countPop();};
+
+/* ============ INFLATABLE PUMP SCROLLBAR ============ */
+let pressure=100,deflated=false,pumpOn=true,pumpPaused=false;
+const THRESH=15;
+const PUMPMSGS=['Pump harder. Your opinions are running out of air.','Inflation is not optional here.',
+ 'Congratulations. You have successfully inflated a scrollbar.','Your scrolling privileges have been temporarily revoked.','Air is temporary. Rage is forever.'];
+function renderPump(){$('#gFill').style.width=pressure+'%';$('#pPct').textContent=Math.round(pressure)+'%';$('#btnPump').disabled=!pumpOn||pumpPaused;}
+every(()=>{if(!pumpOn||pumpPaused||document.hidden)return;pressure=Math.max(0,pressure-3.1);
+ if(pressure<THRESH&&!deflated)deflate();renderPump();},300);
+function deflate(){deflated=true;world.scrollLeft=0;addRage(5);unlockAch('hotair');
+ $('#pumpMsg').textContent='YOUR SCROLLING PRIVILEGES HAVE EXPIRED.';
+ const f=$('#deflateFlash');f.classList.add('show');later(()=>f.classList.remove('show'),1600);renderPump();}
+ $('#btnPump').onclick=()=>{if(!pumpOn||pumpPaused)return;S.pumps++;pressure=Math.min(100,pressure+16);updateFinal();
+ if(deflated&&pressure>THRESH){deflated=false;$('#pumpMsg').textContent='Pressure restored. Your privileges are temporarily real again.';}
+ else $('#pumpMsg').textContent=PUMPMSGS[S.pumps%PUMPMSGS.length];renderPump();};
+ $('#btnPause').onclick=()=>{pumpPaused=!pumpPaused;$('#btnPause').textContent=pumpPaused?'RESUME':'PAUSE';
+ $('#pumpMsg').textContent=pumpPaused?'Pump paused. Physics paused. You\'re welcome.':'Pressure decreasing. As is trust.';renderPump();};
+ $('#btnPumpReset').onclick=()=>{pressure=100;deflated=false;renderPump();$('#pumpMsg').textContent='Reset. The air is fresh, like your disappointment.';};
+ $('#btnPumpOff').onclick=()=>{pumpOn=!pumpOn;deflated=false;renderPump();
+ $('#btnPumpOff').textContent=pumpOn?'DISABLE PUMP — NORMAL SCROLLING':'RE-ENABLE PUMP (why?)';
+ $('#pumpMsg').textContent=pumpOn?'Pump re-enabled. braver than the troops.':'Normal scrolling enabled. The pump feels nothing.';};
+world.addEventListener('scroll',()=>{if(pumpOn&&deflated&&world.scrollLeft>2)world.scrollLeft=0;});
+world.addEventListener('wheel',e=>{if(!pumpOn)return;if(deflated){e.preventDefault();return;}
+ e.preventDefault();world.scrollLeft+=e.deltaY+e.deltaX;},{passive:false});
+let drag=null;
+world.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse')return;drag={x:e.clientX,s:world.scrollLeft};});
+window.addEventListener('pointermove',e=>{if(drag)world.scrollLeft=drag.s-(e.clientX-drag.x);});
+window.addEventListener('pointerup',()=>drag=null);
+world.addEventListener('keydown',e=>{const k=e.key;
+ if(k==='ArrowRight'){world.scrollLeft+=140;e.preventDefault();}
+ else if(k==='ArrowLeft'){world.scrollLeft-=140;e.preventDefault();}
+ else if(k==='Home'){world.scrollLeft=0;e.preventDefault();}
+ else if(k==='End'){world.scrollLeft=world.scrollWidth;e.preventDefault();}});
+renderPump();
+
+/* ============ EASTER EGGS ============ */
+ $('#avatar').addEventListener('click',()=>{S.avatarN++;if(S.avatarN===5){unlockEgg('avatar','You have established dominance over a pixelated man.');unlockAch('avatar');}});
+ $('#vBadge').onclick=()=>unlockEgg('verified','Verified by the Council of Questionable Decisions. The badge is decorative, like most things here.');
+ $('#statBox').addEventListener('mouseenter',function h(){unlockEgg('stats','Fun fact: none of these numbers are real. Just like our motivation.');$('#statBox').removeEventListener('mouseenter',h);});
+ $('#logoEgg').addEventListener('click',()=>{S.logoN++;if(S.logoN===3)unlockEgg('void','You found the void. It\'s empty. Like the follow button\'s promises.');});
+let keyBuf='';
+document.addEventListener('keydown',e=>{
+ if(e.target.matches('input,textarea'))return;
+ keyBuf=(keyBuf+e.key).slice(-4);
+ if(keyBuf==='RAGE'){$('#councilModal').classList.remove('hidden');unlockEgg('council','You summoned the Council.');unlockAch('council');keyBuf='';}
+ if(e.key==='?')unlockEgg('help','There is no help. There never was.');
+ if(e.key==='Escape'){
+  if(cornState.open){closeCorn();return;}
+  if(!document.body.classList.contains('loud')){$$('.overlay:not(.hidden)').forEach(o=>{if(o.id!=='escapeModal')o.classList.add('hidden');});return;}
+  unmute();}});
+
+/* ============ TAB-TITLE GUILT ============ */
+document.addEventListener('visibilitychange',()=>{
+ document.title=document.hidden?'BRO COME BACK 💀':'RAGE//SOCIAL — Your Worst Decision Today';});
+
+/* ============ FINAL REVEAL + ESCAPE ============ */
+const REVEAL=['There was never a council.','There was never a verification system.',
+ 'There is only HTML, CSS, and regret.','You pumped fake air into a fake scrollbar on a fake internet.',
+ '…Thanks for playing. Touch grass.'];
+new IntersectionObserver((es,o)=>{if(es[0].isIntersecting){const el=$('#finalReveal');el.classList.remove('small');el.style.color='var(--yellow)';
+ el.textContent='THE FINAL REVEAL: '+REVEAL[Math.floor(Math.random()*REVEAL.length)];unlockEgg('reveal','The website confessed. It\'s just code.');o.disconnect();}},
+ {threshold:.4}).observe($('#btnEscape'));
+ $('#btnEscape').onclick=()=>{$('#escapeModal').classList.remove('hidden');};
+ $('#escBack').onclick=()=>location.href='index.html';
+
+/* ============ MASTER ANNOYANCES SWITCH ============ */
+ $('#btnAnnoy').onclick=()=>{S.annoy=!S.annoy;
+ $('#btnAnnoy').textContent=S.annoy?'DISABLE ANNOYANCES':'ANNOYANCES: OFF (you win)';
+ if(!S.annoy){$('#popHost').innerHTML='';$('#cookieHost').innerHTML='';syncCloseAll();toast('Annoyances disabled. Coward mode engaged.','good');}
+ else toast('Annoyances re-enabled. Brave.');};
+
+/* intro toasts */
+later(()=>toast('Welcome to the profile of Certified Menace. Fictional. Loud. Horizontally enormous.'),600);
+later(()=>toast('TIP: keep the pressure gauge alive, or your scrolling privileges expire.','warn'),5000);
+updateFinal();
+})();
+</script>
+</body>
+</html>

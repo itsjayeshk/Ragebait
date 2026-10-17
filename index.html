@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAGE//SOCIAL — Your Worst Decision Today</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a0a;--fg:#f2f2f2;--panel:#141414;--panel2:#1c1c1c;--line:#2b2b2b;--red:#ff2d40;--yellow:#ffd60a;--green:#39ff14;--muted:#9a9a9a}
+body{min-height:100vh;background:var(--bg);color:var(--fg);font-family:"Arial Black",Arial,system-ui,sans-serif;display:flex;align-items:center;justify-content:center;padding:20px}
+a,button{font-family:inherit}
+.wrap{width:min(920px,96vw)}
+.logo{font-size:clamp(2rem,6vw,3.4rem);letter-spacing:-2px;text-align:center}
+.logo b{color:var(--red)}
+.tag{text-align:center;color:var(--muted);font-size:.75rem;margin:6px 0 18px;letter-spacing:2px}
+.card{background:var(--panel);border:3px solid var(--line);box-shadow:10px 10px 0 #000}
+.tabs{display:flex;border-bottom:3px solid var(--line)}
+.tabs button{flex:1;padding:14px;background:none;border:0;color:var(--muted);font-weight:900;cursor:pointer;letter-spacing:1px}
+.tabs button[aria-selected="true"]{color:var(--fg);background:var(--panel2);box-shadow:inset 0 -4px 0 var(--red)}
+.tabs button:focus-visible{outline:3px solid var(--yellow);outline-offset:-3px}
+.panel{padding:22px;display:none}.panel.active{display:block}
+.zone{min-height:130px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:.7rem;letter-spacing:2px;color:var(--muted);margin-bottom:6px}
+.field input{width:100%;padding:12px;background:var(--panel2);border:2px solid var(--line);color:var(--fg);font:inherit;font-size:.95rem}
+.field input:focus{outline:3px solid var(--yellow);outline-offset:2px}
+.mov{display:block}
+.calm .mov{transform:none!important}
+body:not(.calm) .mov{transition:transform .45s cubic-bezier(.2,.9,.3,1.4)}
+.hint{font-size:.68rem;color:var(--muted);letter-spacing:1px;margin-top:5px}
+.jitter{animation:jit .8s infinite steps(2)}@keyframes jit{0%{transform:translate(0,0)}25%{transform:translate(1px,-1px)}50%{transform:translate(-1px,1px)}75%{transform:translate(1px,1px)}100%{transform:translate(-1px,-1px)}}
+.blink{animation:bl 1s infinite}@keyframes bl{50%{opacity:.25}}
+.pix{animation:px 2.4s infinite}@keyframes px{0%,90%{filter:none}92%{filter:contrast(220%) blur(.4px)}96%{filter:blur(1.4px)}100%{filter:none}}
+.btn{padding:12px 18px;border:2px solid var(--fg);background:var(--panel2);color:var(--fg);font-weight:900;letter-spacing:1px;cursor:pointer}
+.btn:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+.btn-red{background:var(--red);border-color:var(--red);color:#fff}
+.btn-ghost{background:none;color:var(--muted);border-color:var(--line)}
+.btn[disabled]{opacity:.35;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.linklike{background:none;border:0;color:var(--yellow);text-decoration:underline;cursor:pointer;font-size:.85rem}
+.rules{list-style:none;margin-top:12px;border:2px dashed var(--line);max-height:230px;overflow:auto}
+.rules li{display:flex;gap:8px;padding:7px 10px;font-size:.75rem;border-bottom:1px solid var(--line);color:var(--red)}
+.rules li.ok{color:var(--green)}
+.rules li .st{width:1.1em;flex:none}
+.pill{display:inline-block;background:var(--panel2);border:2px solid var(--line);padding:3px 10px;font-size:.72rem;letter-spacing:2px;color:var(--yellow)}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px}
+.hidden{display:none!important}
+.modal{background:var(--panel);border:3px solid var(--red);max-width:560px;width:100%;padding:24px;max-height:92vh;overflow:auto}
+.modal h2{color:var(--red);letter-spacing:1px;margin-bottom:10px;font-size:1.2rem}
+.modal h3{margin-bottom:8px;letter-spacing:1px}
+.bar{height:22px;border:2px solid var(--line);background:var(--panel2)}
+.bar>div{height:100%;width:0%;background:var(--red)}
+.vq{font-size:1.05rem;margin:12px 0}
+.center{text-align:center}
+.small{font-size:.72rem;color:var(--muted)}
+.err{color:var(--red);font-weight:900;min-height:1.2em;margin-top:6px;font-size:.78rem}
+.congrats{color:var(--green);font-weight:900;margin-top:8px;font-size:.85rem;animation:pop .4s}
+@keyframes pop{0%{transform:scale(.7)}60%{transform:scale(1.15)}}
+.shake{animation:shk .35s}@keyframes shk{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}}
+.toasts{position:fixed;bottom:14px;right:14px;display:flex;flex-direction:column;gap:8px;z-index:2000;max-width:320px}
+.toast{background:var(--panel);border:2px solid var(--red);padding:10px 12px;font-size:.8rem;box-shadow:6px 6px 0 #000;animation:tin .25s}
+.toast.warn{border-color:var(--yellow)}.toast.good{border-color:var(--green)}
+@keyframes tin{from{transform:translateY(12px);opacity:0}}
+.cap{position:fixed;width:260px;background:var(--panel);border:3px solid var(--yellow);padding:12px;z-index:1500;font-size:.8rem;box-shadow:8px 8px 0 #000;right:14px;bottom:14px}
+.cap h4{color:var(--yellow);margin-bottom:8px;font-size:.8rem;letter-spacing:1px}
+.cap .sq{display:inline-flex;width:52px;height:52px;border:2px solid var(--line);background:var(--panel2);align-items:center;justify-content:center;font-size:1.5rem;cursor:pointer;margin-right:6px;color:var(--fg)}
+.cap .sq:focus-visible{outline:3px solid var(--yellow)}
+.googlie{border:2px solid var(--line);background:var(--panel2);width:min(560px,100%);padding:12px;font-weight:900;cursor:pointer;color:var(--fg);letter-spacing:1px}
+.googlie span i{color:#EA4335;font-style:normal}.googlie span b{color:#4285F4}.googlie span u{color:#FBBC05}.googlie span s{color:#34A853}
+.vfin p{margin:6px 0;font-weight:900}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 class="logo">RAGE<b>//</b>SOCIAL</h1>
+  <p class="tag">A PREMIUM SOCIAL EXPERIENCE* &nbsp;<span class="small">*results may include suffering</span></p>
+
+  <div class="card">
+    <div class="tabs" role="tablist">
+      <button id="tabLogin" role="tab" aria-selected="true">LOGIN</button>
+      <button id="tabSignup" role="tab" aria-selected="false">SIGN UP</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="panelLogin" class="panel active" role="tabpanel">
+      <form id="formLogin" novalidate>
+        <div class="zone">
+          <div class="field mov">
+            <label for="lEmail">EMAIL</label>
+            <input id="lEmail" type="email" autocomplete="off" placeholder="definitely.real@human.exe">
+          </div>
+          <div class="field mov">
+            <label for="lPass">PASSWORD</label>
+            <input id="lPass" type="password" autocomplete="off" placeholder="••••••••">
+            <button type="button" class="linklike" id="lToggle">SHOW PASSWORD</button>
+          </div>
+        </div>
+        <div class="row">
+          <button class="btn btn-red" type="submit">LOGIN</button>
+          <button class="btn" type="button" id="btnToSignup">SIGN UP</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- SIGNUP -->
+    <div id="panelSignup" class="panel" role="tabpanel">
+      <div id="suStep1">
+        <h3>USERNAME CREATION: RAGEBAIT EDITION</h3>
+        <p class="small" style="margin:6px 0 14px">Choose your username. Only the worthy may enter.</p>
+        <form id="formUser" novalidate>
+          <div class="field">
+            <label for="sEmail">EMAIL</label>
+            <input id="sEmail" type="email" autocomplete="off" placeholder="you@disappointment.net">
+          </div>
+          <div class="field">
+            <label for="sUser">USERNAME <span class="pill" id="sUserCount">0/12</span></label>
+            <input id="sUser" type="text" autocomplete="off" spellcheck="false">
+            <p class="err" id="sUserErr" role="alert"></p>
+          </div>
+          <button class="btn btn-red" type="submit">VALIDATE USERNAME</button>
+        </form>
+      </div>
+
+      <div id="suStep2" class="hidden">
+        <h3>THE PASSWORD GAME</h3>
+        <p class="small blink">All rules apply simultaneously. The council is watching.</p>
+        <form id="formPass" novalidate>
+          <div class="field">
+            <label for="sPass">PASSWORD</label>
+            <input id="sPass" type="password" autocomplete="off" spellcheck="false">
+            <button type="button" class="linklike" id="sToggle">SHOW PASSWORD</button>
+            <p class="hint jitter pix" id="pwHint">TIP: The council enjoys emoji, Roman numerals, and the number 69. This tip may or may not be pixelated on purpose.</p>
+          </div>
+          <ul class="rules" id="rules"></ul>
+          <p class="congrats hidden" id="pwCongrats">CONGRATULATIONS. YOUR PASSWORD HAS MORE PERSONALITY THAN YOU.</p>
+          <div class="row"><button class="btn btn-red" type="submit" id="btnContinue" disabled>CONTINUE</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:14px;justify-content:center">
+    <button class="googlie" id="btnGooglie" type="button">
+      <span><i>G</i><b>O</b>&nbsp;<u>O</u><s>G</s><b>L</b><i>I</i><u>E</u></span>&nbsp;&nbsp;CONTINUE WITH GO OGLIE
+    </button>
+  </div>
+  <p class="small center" style="margin-top:10px">Demo only. Nothing is stored, sent, saved, or taken seriously.
+  <button class="linklike" id="btnAnnoy" type="button">DISABLE ANNOYANCES</button></p>
+</div>
+
+<!-- LOADING BETRAYAL -->
+<div class="overlay hidden" id="loadOverlay" role="dialog" aria-modal="true" aria-label="Loading">
+  <div class="modal center">
+    <h3>ESTABLISHING CONNECTION</h3>
+    <div class="bar"><div id="loadBar"></div></div>
+    <p class="small" id="loadMsg" style="margin:8px 0">Reticulating splines…</p>
+    <button class="linklike" id="skipLink" type="button">SKIP</button>
+  </div>
+</div>
+
+<!-- HUMAN VERIFICATION -->
+<div class="overlay hidden" id="verifyModal" role="dialog" aria-modal="true" aria-label="Human verification">
+  <div class="modal">
+    <h2>HUMAN VERIFICATION</h2>
+    <div class="bar"><div id="vBar"></div></div>
+    <div id="vBody">
+      <p class="small" id="vNum" style="margin-top:10px"></p>
+      <p class="vq" id="vQ"></p>
+      <div class="field"><input id="vAns" type="text" autocomplete="off" placeholder="your answer" aria-label="answer"></div>
+      <div class="row"><button class="btn btn-red" id="vSubmit" type="button">SUBMIT</button></div>
+    </div>
+    <div id="vFinal" class="hidden center vfin"></div>
+  </div>
+</div>
+
+<!-- GO OGLIE -->
+<div class="overlay hidden" id="googlieModal" role="dialog" aria-modal="true" aria-label="Googlie authorization">
+  <div class="modal center">
+    <h2>GO OGLIE™ SECURE AUTHORIZATION</h2>
+    <div class="bar"><div id="gBar"></div></div>
+    <p class="small" id="gMsg" style="margin-top:10px">Contacting the Googlie mothership…</p>
+    <div class="row hidden" id="gManual" style="justify-content:center"><button class="btn btn-red" id="gOpen" type="button">OPEN THE SURPRISE YOURSELF</button></div>
+    <div class="row" style="justify-content:center;margin-top:10px"><button class="btn btn-ghost" id="gClose" type="button">CLOSE</button></div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<div id="capHost"></div>
+
+<script>
+"use strict";
+(function(){
+const $=s=>document.querySelector(s);
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const S={annoy:true,skipTries:0,loadTimer:null,auto:null};
+const RICK='https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+
+function toast(msg,cls){const t=document.createElement('div');t.className='toast '+(cls||'');t.textContent=msg;$('#toasts').appendChild(t);setTimeout(()=>t.remove(),4200);}
+
+/* ---- tabs ---- */
+const tl=$('#tabLogin'),ts=$('#tabSignup'),pl=$('#panelLogin'),ps=$('#panelSignup');
+function tab(w){tl.setAttribute('aria-selected',w==='l');ts.setAttribute('aria-selected',w==='s');pl.classList.toggle('active',w==='l');ps.classList.toggle('active',w==='s');}
+tl.onclick=()=>tab('l');ts.onclick=()=>tab('s');$('#btnToSignup').onclick=()=>tab('s');
+
+/* ---- show/hide password ---- */
+function tog(inp,btn){const show=inp.type==='password';inp.type=show?'text':'password';btn.textContent=show?'HIDE PASSWORD':'SHOW PASSWORD';}
+ $('#lToggle').onclick=()=>tog($('#lPass'),$('#lToggle'));
+ $('#sToggle').onclick=()=>tog($('#sPass'),$('#sToggle'));
+
+/* ---- moving inputs (chaos) ---- */
+const movs=[...document.querySelectorAll('.mov')];
+setInterval(()=>{ if(!S.annoy||reduced||document.hidden) return; if(document.querySelector('.overlay:not(.hidden)')) return;
+  movs.forEach(m=>{ if(m.contains(document.activeElement)) return;
+    m.style.transform='translate('+(Math.random()*48-24).toFixed(1)+'px,'+(Math.random()*20-10).toFixed(1)+'px)';});
+},900);
+document.addEventListener('focusin',e=>{const m=e.target.closest('.mov');if(m)m.style.transform='';});
+
+/* ---- password hint calms down when used ---- */
+const pwHint=$('#pwHint');
+ $('#sPass').addEventListener('focus',()=>pwHint.classList.remove('jitter','pix'));
+ $('#sPass').addEventListener('blur',()=>{if(!reduced)pwHint.classList.add('jitter');});
+
+/* ---- loading screen betrayal ---- */
+function runLoading(done){
+  const ov=$('#loadOverlay'),bar=$('#loadBar'),msg=$('#loadMsg'),skip=$('#skipLink');
+  ov.classList.remove('hidden');S.skipTries=0;skip.textContent='SKIP';msg.textContent='Reticulating splines…';
+  let p=0;clearInterval(S.loadTimer);clearTimeout(S.auto);
+  S.loadTimer=setInterval(()=>{p=Math.min(99,p+2);bar.style.width=p+'%';
+    if(p>=99){clearInterval(S.loadTimer);msg.textContent='Stuck at 99%. Classic.';
+      S.auto=setTimeout(()=>finish('We got bored waiting for you.'),6000);}
+  },40);
+  function finish(m){clearTimeout(S.auto);clearInterval(S.loadTimer);bar.style.width='100%';msg.textContent=m||'Fine. You win.';
+    setTimeout(()=>{ov.classList.add('hidden');bar.style.width='0%';done();},450);}
+  skip.onclick=()=>{S.skipTries++;if(S.skipTries===1)msg.textContent='Nice try. We are at 99%.';else finish('Fine. You win.');};
+}
+
+/* ---- human verification ---- */
+const QS=[
+ {q:'What is 847 × 23?',a:['19481']},
+ {q:'What is the capital of Australia?',a:['canberra']},
+ {q:'All but 9 of 17 sheep run away. How many remain?',a:['9','nine']},
+ {q:'Which planet has the shortest year?',a:['mercury']},
+ {q:'In JavaScript, what does 2 + "2" return?',a:['22']}
+];
+let vIdx=0,vDone=null;
+const norm=v=>v.trim().toLowerCase().replace(/^["']+|["']+$/g,'');
+function openVerify(cb){vIdx=0;vDone=cb;$('#verifyModal').classList.remove('hidden');$('#vFinal').classList.add('hidden');$('#vBody').classList.remove('hidden');renderQ();}
+function renderQ(){$('#vBar').style.width=(vIdx/QS.length*100)+'%';$('#vNum').textContent='QUESTION '+(vIdx+1)+' / '+QS.length;$('#vQ').textContent=QS[vIdx].q;$('#vAns').value='';$('#vAns').focus();}
+function sub(){const v=norm($('#vAns').value);
+ if(QS[vIdx].a.some(a=>a===v)){vIdx++;if(vIdx<QS.length)renderQ();else finale();}
+ else{toast('WRONG. Even the toaster is disappointed. Retry.','warn');$('#vAns').classList.add('shake');setTimeout(()=>$('#vAns').classList.remove('shake'),400);}}
+ $('#vSubmit').onclick=sub;
+ $('#vAns').addEventListener('keydown',e=>{if(e.key==='Enter')sub();});
+function finale(){
+ $('#vBar').style.width='100%';$('#vBody').classList.add('hidden');
+ const f=$('#vFinal');f.classList.remove('hidden');f.innerHTML='';
+ const steps=['5/5 CHALLENGES COMPLETED','HUMAN VERIFICATION COMPLETE','Analyzing your results...'];let i=0;
+ const iv=setInterval(()=>{ if(i<steps.length){const p=document.createElement('p');p.textContent=steps[i];f.appendChild(p);i++;}
+  else{clearInterval(iv);f.innerHTML='';
+   [['VERIFICATION FAILED 💀','var(--red)'],['You answered every question correctly.',''],
+    ['No human has ever been this unemployed.',''],['Reason: Excessive intelligence detected.','var(--yellow)'],
+    ['YOUR HUMANITY IS UNDER REVIEW','var(--red)']].forEach(([t,c])=>{const p=document.createElement('p');p.textContent=t;p.style.color=c;f.appendChild(p);});
+   const r1=document.createElement('button');r1.className='btn';r1.textContent='I DEMAND A RECOUNT';r1.onclick=()=>openVerify(vDone);
+   const r2=document.createElement('button');r2.className='btn btn-red';r2.textContent='CONTINUE ANYWAY';
+   r2.onclick=()=>{$('#verifyModal').classList.add('hidden');if(vDone)vDone();};
+   const w=document.createElement('div');w.className='row';w.style.justifyContent='center';w.style.marginTop='12px';w.append(r1,r2);f.appendChild(w);}
+ },900);
+}
+
+/* ---- login flow ---- */
+ $('#formLogin').addEventListener('submit',e=>{e.preventDefault();
+ const em=$('#lEmail').value.trim(),pw=$('#lPass').value;
+ if(!em||!pw){toast('Even fake accounts need fake credentials.','warn');return;}
+ runLoading(()=>{toast('Verifying that you are 97% disappointment…','warn');openVerify(()=>{location.href='profile.html';});});
+});
+
+/* ---- username torture (12 secret rules) ---- */
+function userRules(u){return [
+ u.length>=8,u.includes('a'),u.includes('e'),u.includes('i'),u.includes('o'),u.includes('u'),
+ u.includes('R'),u.includes('X'),(u.match(/\d/g)||[]).length>=2,u.includes('_'),
+ /^[A-Za-z]/.test(u),u.length>0&&!/\s/.test(u)];}
+ $('#sUser').addEventListener('input',e=>{$('#sUserCount').textContent=userRules(e.target.value).filter(Boolean).length+'/12';});
+ $('#formUser').addEventListener('submit',e=>{e.preventDefault();
+ const u=$('#sUser').value,r=userRules(u);
+ $('#sUserCount').textContent=r.filter(Boolean).length+'/12';
+ if(r.every(Boolean)){$('#sUserErr').textContent='';$('#suStep1').classList.add('hidden');$('#suStep2').classList.remove('hidden');
+  toast('Username accepted. The council is already regretting it.','good');}
+ else{$('#sUser').value='';$('#sUserCount').textContent='0/12';
+  $('#sUserErr').textContent='USERNAME REJECTED. THE COUNCIL HAS DECLINED TO ELABORATE.';}
+});
+
+/* ---- the impossible password game ---- */
+function dailyCode(){const d=new Date();let s=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
+ const C='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let o='';
+ for(let i=0;i<4;i++){s=(s*1103515245+12345)%2147483648;o+=C[s%C.length];}return o;}
+const CODE=dailyCode();
+function hasPal(s){const t=s.toLowerCase();
+ for(let i=0;i<t.length;i++)for(let j=i+3;j<=t.length;j++){const sub=t.slice(i,j);if(sub===[...sub].reverse().join(''))return true;}return false;}
+const RULES=[
+ {t:'Minimum 8 characters',f:v=>v.length>=8,m:"That's it? My Wi-Fi password has more ambition."},
+ {t:'At least one uppercase letter',f:v=>/[A-Z]/.test(v),m:'Show some authority. CAPITALIZE SOMETHING.'},
+ {t:'At least one digit',f:v=>/\d/.test(v),m:'Your password needs at least one academic achievement.'},
+ {t:'At least one special character',f:v=>/[^A-Za-z0-9\s]/.test(v),m:'Even your password needs personality.'},
+ {t:"Contains 'RAGE' (case-sensitive)",f:v=>v.includes('RAGE'),m:'You are literally on RAGE//SOCIAL. Act like it.'},
+ {t:"Contains '69'",f:v=>v.includes('69'),m:'Nice.'},
+ {t:'Contains a Roman numeral character (I V X L C D M)',f:v=>/[IVXLCDM]/i.test(v),m:'Prove you attended history class.'},
+ {t:'Contains an emoji (paste one, coward)',f:v=>/\p{Extended_Pictographic}/u.test(v),m:"Words aren't enough. Express your suffering."},
+ {t:'Contains a palindrome (3+ chars, e.g. "lol")',f:hasPal,m:'Your password must be able to look in the mirror.'},
+ {t:"Contains today's daily code: "+CODE,f:v=>v.includes(CODE),m:'The council has changed the rules again.'}
+];
+const ul=$('#rules');
+RULES.forEach(()=>{const li=document.createElement('li');li.innerHTML='<span class="st"></span><span></span>';ul.appendChild(li);});
+ $('#sPass').addEventListener('input',e=>{const v=e.target.value;let ok=0;
+ [...ul.children].forEach((li,i)=>{const pass=RULES[i].f(v);li.classList.toggle('ok',pass);
+  li.children[0].textContent=pass?'✓':'✗';li.children[1].textContent=pass?RULES[i].t:RULES[i].m;if(pass)ok++;});
+ const done=ok===RULES.length;$('#btnContinue').disabled=!done;$('#pwCongrats').classList.toggle('hidden',!done);});
+ $('#formPass').addEventListener('submit',e=>{e.preventDefault();
+ if($('#btnContinue').disabled){toast('The checklist is right there. It is watching you.','warn');return;}
+ openVerify(()=>{$('#sPass').value='';location.href='profile.html';});});
+
+/* ---- Go Oglie (explicit user click → the one intentional rickroll) ---- */
+ $('#btnGooglie').onclick=()=>{
+ $('#googlieModal').classList.remove('hidden');$('#gManual').classList.add('hidden');
+ $('#gMsg').textContent='Contacting the Googlie mothership…';let p=0;const b=$('#gBar');b.style.width='0%';
+ const iv=setInterval(()=>{p+=8;b.style.width=Math.min(p,100)+'%';if(p>=100)clearInterval(iv);},90);
+ setTimeout(()=>{$('#gMsg').textContent='Negotiating with the council of questionable decisions…';},600);
+ setTimeout(()=>{const w=window.open(RICK,'_blank','noopener');
+  if(!w){$('#gMsg').textContent='Your popup blocker protected you. For now.';$('#gManual').classList.remove('hidden');}
+  else{$('#gMsg').textContent='You have been Googlie\'d. Googlie accepts no responsibility.';}},1600);};
+ $('#gOpen').onclick=()=>window.open(RICK,'_blank','noopener');
+ $('#gClose').onclick=()=>$('#googlieModal').classList.add('hidden');
+
+/* ---- recurring CAPTCHA popups (every ~10s, dismissible, capped) ---- */
+const CAPS=[
+ {t:'Are you still human?',type:'b',b:['MOSTLY','WHO CARES']},
+ {t:'Click the square that contains absolutely nothing.',type:'sq'},
+ {t:'Prove that you are not a sophisticated toaster.',type:'b',b:['I AM NOT A TOASTER','BEEP']}
+];
+function spawnCap(){ if(!S.annoy||document.hidden||document.querySelector('.cap')) return;
+ const c=CAPS[Math.floor(Math.random()*CAPS.length)];
+ const el=document.createElement('div');el.className='cap';
+ const h=document.createElement('h4');h.textContent='QUICK CHECK';const p=document.createElement('p');p.textContent=c.t;el.append(h,p);
+ const row=document.createElement('div');row.className='row';el.appendChild(row);
+ function dismiss(){el.remove();}
+ if(c.type==='b'){c.b.forEach(txt=>{const b=document.createElement('button');b.className='btn';b.textContent=txt;
+   b.onclick=()=>{dismiss();toast(txt==='BEEP'?'Toaster detected. Dismissed anyway.':'Humanity: unverified. Dismissed anyway.');};row.appendChild(b);});}
+ else{['🍕','','🤖'].sort(()=>Math.random()-.5).forEach(s=>{const b=document.createElement('button');b.className='sq';b.textContent=s;
+   b.setAttribute('aria-label',s?('square containing '+s):'empty square');
+   b.onclick=()=>{if(s===''){dismiss();toast('Correct. You are formally nothing.','good');}else toast('That square contains something. Like your excuses.','warn');};row.appendChild(b);});}
+ const f=document.createElement('p');f.className='small';f.style.marginTop='8px';
+ const d1=document.createElement('button');d1.className='linklike';d1.textContent='dismiss';d1.onclick=dismiss;
+ const d2=document.createElement('button');d2.className='linklike';d2.textContent=' · DISABLE RECURRING INTERRUPTIONS';
+ d2.onclick=()=>{disableAnnoy();dismiss();};
+ f.append(d1,d2);el.appendChild(f);document.body.appendChild(el);}
+let capTimer=setInterval(spawnCap,10000);
+window.addEventListener('beforeunload',()=>{clearInterval(capTimer);clearInterval(S.loadTimer);clearTimeout(S.auto);});
+
+/* ---- master annoyances switch ---- */
+function disableAnnoy(){S.annoy=!S.annoy;
+ $('#btnAnnoy').textContent=S.annoy?'DISABLE ANNOYANCES':'ANNOYANCES: OFF (you win)';
+ document.body.classList.toggle('calm',!S.annoy);
+ if(!S.annoy){document.querySelectorAll('.cap').forEach(e=>e.remove());toast('Annoyances disabled. Coward mode engaged.','good');}
+ else toast('Annoyances re-enabled. Brave.');}
+ $('#btnAnnoy').onclick=disableAnnoy;
+})();
+</script>
+</body>
+</html>
